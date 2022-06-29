@@ -2,6 +2,7 @@ package redis
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -51,6 +52,7 @@ func New(cnf *config.Config, addrs []string, db, retries int) Lock {
 func (r Lock) LockWithRetries(key string, unixTsToExpireNs int64) error {
 	for i := 0; i <= r.retries; i++ {
 		err := r.Lock(key, unixTsToExpireNs)
+		fmt.Println("Lock", err)
 		if err == nil {
 			//成功拿到锁，返回
 			return nil
@@ -67,6 +69,7 @@ func (r Lock) Lock(key string, unixTsToExpireNs int64) error {
 	ctx := r.rclient.Context()
 
 	success, err := r.rclient.SetNX(ctx, key, unixTsToExpireNs, expiration).Result()
+	fmt.Println("SetNX", success, err)
 	if err != nil {
 		return err
 	}
